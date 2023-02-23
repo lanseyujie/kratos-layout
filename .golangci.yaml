@@ -1,0 +1,97 @@
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+  skip-dirs:
+  - api
+  skip-files: []
+output:
+  format: colored-line-number
+linters:
+  disable-all: true
+  fast: false
+  enable:
+  - asasalint
+  - asciicheck
+  - bidichk
+  - bodyclose
+  - containedctx
+  - contextcheck
+  - decorder
+  - depguard
+  - dogsled
+  - durationcheck
+  - errcheck
+  - errchkjson
+  - errname
+  - errorlint
+  - execinquery
+  - exportloopref
+  - forbidigo
+  - forcetypeassert
+  - funlen
+  - gochecknoinits
+  #- gochecknoglobals
+  - gocognit
+  - goconst
+  - gocritic
+  - gocyclo
+  - godot
+  - goerr113
+  - gofmt
+  - goheader
+  - goimports
+  - gomnd
+  - gomoddirectives
+  - gomodguard
+  - goprintffuncname
+  - gosec
+  - gosimple
+  - govet
+  - grouper
+  - importas
+  - ineffassign
+  - interfacebloat
+  - lll
+  - loggercheck
+  - maintidx
+  - makezero
+  - misspell
+  - nestif
+  - nilerr
+  - nilnil
+  - nlreturn
+  - noctx
+  - nolintlint
+  - nosprintfhostport
+  - prealloc
+  - predeclared
+  - reassign
+  - revive
+  - rowserrcheck
+  - sqlclosecheck
+  - staticcheck
+  - stylecheck
+  - tenv
+  - testableexamples
+  - thelper
+  - tparallel
+  - typecheck
+  - unconvert
+  - unparam
+  - unused
+  - usestdlibvars
+  - wastedassign
+  - whitespace
+linters-settings:
+  goconst:
+    ignore-tests: true
+  gomnd:
+    checks:
+    - case
+    - condition
+    - return
+  govet:
+    check-shadowing: true
+  lll:
+    line-length: 160

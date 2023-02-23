@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package conf;
+
+option go_package = "app/post/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message Bootstrap {
+  Server server = 1; // Server
+  Data data = 2;     // Data Source
+}
+
+message Server {
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+
+  message GRPC {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+
+  HTTP http = 1;
+  GRPC grpc = 2;
+}
+
+message Data {
+  message Ent {
+    message Migration {
+      bool drop_index = 1; // 迁移时删除旧索引
+      bool drop_column = 2; // 迁移时删除旧字段
+      bool foreign_keys = 3; // 迁移时允许创建外键
+    }
+    string driver = 1;
+    string dsn = 2;
+    Migration migration = 3;
+  }
+
+  Ent ent = 1;
+}
