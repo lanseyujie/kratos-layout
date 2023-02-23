@@ -10,8 +10,8 @@ PASSWORD    ?= ''
 MIRROR      ?= repo.huaweicloud.com
 
 CGO_ENABLED ?= off
-GOOS        ?= linux
-GOARCH      ?= amd64
+GOOS        ?= $(shell go env GOOS)
+GOARCH      ?= $(shell go env GOARCH)
 GOPATH      ?= $(shell go env GOPATH)
 GOBIN       ?= $(GOPATH)/bin
 GOCACHE     ?= $(GOPATH)/cache
