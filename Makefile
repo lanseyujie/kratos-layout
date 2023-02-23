@@ -84,6 +84,7 @@ generate:
 	@$(GO) mod tidy
 	@$(GO) get github.com/google/wire/cmd/wire@latest
 	@$(GO) generate -x ./...
+	wire ./...
 
 .PHONY: all
 # generate all

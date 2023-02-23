@@ -1,5 +1,3 @@
-//go:generate wire .
-
 package main
 
 import (
