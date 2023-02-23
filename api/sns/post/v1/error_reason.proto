@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package sns.post.v1;
+
+import "errors/errors.proto";
+
+option go_package = "sns/post/v1;v1";
+option java_multiple_files = true;
+option java_package = "com.kratos.sns.post.v1";
+option objc_class_prefix = "SnsPostV1";
+
+enum ErrorReason {
+  option (errors.default_code) = 500;
+
+  // Do not use this default value.
+  ERROR_REASON_UNSPECIFIED = 0;
+  ERROR_REASON_INTERNAL_ERROR = 1;
+  ERROR_REASON_INVALID_PARAMS = 2 [(errors.code) = 400];
+  ERROR_REASON_NOT_FOUND = 3 [(errors.code) = 404];
+  ERROR_REASON_ALREADY_EXISTS = 4 [(errors.code) = 409];
+}

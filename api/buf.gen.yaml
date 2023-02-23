@@ -1,0 +1,25 @@
+version: v1
+plugins:
+- name: validate
+  out: .
+  opt:
+  - paths=source_relative
+  - lang=go
+- name: go
+  out: .
+  opt:
+  - paths=source_relative
+- name: go-grpc
+  out: .
+  opt:
+  - paths=source_relative
+- name: go-http
+  out: .
+  opt:
+  - paths=source_relative
+- name: openapi
+  out: .
+  opt:
+  - fq_schema_naming=true
+  - enum_type=string
+  - default_response=false
