@@ -2,6 +2,8 @@
 
 - [x] Buf
 
+- [x] Ent
+
 - [x] Dockerfile
 
 - [x] Makefile

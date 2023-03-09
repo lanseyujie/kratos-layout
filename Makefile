@@ -1,4 +1,4 @@
-PROJECT     := $(notdir $(basename $(CURDIR)))
+PROJECT     := $(notdir $(CURDIR))
 COMMIT      := $(shell git describe --tags --always 2> /dev/null || echo -n '0.0.0')
 CODENAME    ?= kratos
 MODE        ?= dev
@@ -12,21 +12,16 @@ MIRROR      ?= repo.huaweicloud.com
 CGO_ENABLED ?= off
 GOOS        ?= $(shell go env GOOS)
 GOARCH      ?= $(shell go env GOARCH)
-GOPATH      ?= $(shell go env GOPATH)
-GOBIN       ?= $(GOPATH)/bin
-GOCACHE     ?= $(GOPATH)/cache
-GOENV       ?= $(GOPATH)/env
 GOPROXY     ?= https://goproxy.cn,https://proxy.golang.com.cn,direct
-GOPRIVATE   ?= ''
-GO          := GOOS=$(GOOS) GOARCH=$(GOARCH) GOPATH=$(GOPATH) GOBIN=$(GOBIN) GOCACHE=$(GOCACHE) GOENV=$(GOENV) \
-				GOPROXY=$(GOPROXY) GOPRIVATE=$(GOPRIVATE) go
+GOPRIVATE   ?= $(shell go env GOPRIVATE)
+GO          := GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY) GOPRIVATE=$(GOPRIVATE) go
 GOBUILD     := CGO_ENABLED=$(CGO_ENABLED) $(GO) build
 GOTEST      := CGO_ENABLED=on $(GO) test -race -count=1 -cover -v
 GCFLAGS     += -d=ssa/check_bce
 LDFLAGS     += -s -w -extldflags "-static"
 LDFLAGS     += -X "main.Version=$(VERSION)"
 
-BUILD_FLAGS := -v -a -trimpath -tags $(MODE) -gcflags='$(GCFLAGS)' -ldflags '$(LDFLAGS)'
+BUILD_FLAGS := -v -trimpath -tags $(MODE) -gcflags='$(GCFLAGS)' -ldflags '$(LDFLAGS)'
 
 REINSTALL   ?= false
 TOOLS       := \
@@ -45,7 +40,7 @@ endef
 define list_apps
 	$(foreach dir, $(DIRS), \
 		$(foreach app, $(notdir $(wildcard ./app/$(dir)/cmd/*)), \
-			$(dir)-$(app) \
+			$(PROJECT)-$(dir)-$(app) \
 		) \
 	)
 endef
@@ -63,9 +58,9 @@ init:
 .PHONY: version
 # display version
 version:
-	@echo api: $(shell cd ./api && git describe --tags --always 2> /dev/null || echo $(VERSION))
-	@echo app: $(VERSION)
-	@echo service: $(APPS)
+	@echo api version: $(shell cd ./api && git describe --tags --always 2> /dev/null || echo $(VERSION))
+	@echo app version: $(VERSION)
+	@echo apps: $(APPS)
 
 .PHONY: api
 # generate api code
@@ -126,7 +121,7 @@ build:
 
 build/%:
 	@echo "Building app: $*"
-	@mkdir -p ./bin && cd ./app/$(subst -,/cmd/,$*) && $(GOBUILD) $(BUILD_FLAGS) -o $(CURDIR)/bin/$*
+	mkdir -p ./bin && cd ./app/$(subst -,/cmd/,$(subst $(PROJECT)-,,$*)) && $(GOBUILD) $(BUILD_FLAGS) -o $(CURDIR)/bin/$*
 	@$(if $(shell command -v upx), upx -q -f $(CURDIR)/bin/$*, )
 
 .PHONY: login
@@ -143,7 +138,14 @@ image:
 
 image/%:
 	@echo "Building image for $*"
-	@docker build --build-arg MIRROR=$(MIRROR) --build-arg APP=$* -t $(REGISTRY)/$(CODENAME)/$*:$(VERSION) .
+	docker build --rm \
+		--build-arg MIRROR=$(MIRROR) \
+		--build-arg TIMEZONE=Asia/Shanghai \
+		--build-arg GOPROXY=$(GOPROXY) \
+		--build-arg GOPRIVATE=$(GOPRIVATE) \
+		--build-arg PROJECT=$(PROJECT) \
+		--build-arg APP=$* \
+		-t $(REGISTRY)/$(CODENAME)/$*:$(VERSION) .
 	@echo "#docker push $(REGISTRY)/$(CODENAME)/$*:$(VERSION)"
 
 .PHONY: clean

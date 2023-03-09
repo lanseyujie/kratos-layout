@@ -2,6 +2,9 @@ FROM golang:1.20-alpine AS builder
 
 ARG MIRROR=repo.huaweicloud.com
 ARG TIMEZONE=Asia/Shanghai
+ARG GOPROXY=https://goproxy.cn,https://proxy.golang.com.cn,direct
+ARG GOPRIVATE=''
+ARG PROJECT=''
 ARG APP=''
 
 RUN set -eux \
@@ -10,8 +13,8 @@ RUN set -eux \
     && cp -f /usr/share/zoneinfo/$TIMEZONE /etc/localtime \
     && echo "$TIMEZONE" > /etc/timezone
 
-COPY . /src
-WORKDIR /src
+COPY . /srv/$PROJECT
+WORKDIR /srv/$PROJECT
 
 RUN set -eux \
     && ([ ! -z "$APP" ] || exit 1) \
@@ -23,6 +26,7 @@ FROM alpine:latest
 
 ARG MIRROR=repo.huaweicloud.com
 ARG TIMEZONE=Asia/Shanghai
+ARG PROJECT=''
 ARG APP=''
 
 RUN set -eux \
@@ -35,8 +39,8 @@ RUN set -eux \
     && ([ ! -z "$APP" ] || exit 1) \
     && mkdir -p /srv/configs
 
-COPY --from=builder /src/configs/$APP.yaml /srv/configs/$APP.yaml
-COPY --from=builder /src/bin/$APP /srv/app
+COPY --from=builder /srv/$PROJECT/configs/$APP.yaml /srv/configs/$APP.yaml
+COPY --from=builder /srv/$PROJECT/bin/$APP /srv/app
 
 WORKDIR /srv
 
