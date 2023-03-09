@@ -1,14 +1,6 @@
-CGO_ENABLED ?= off
-GOOS        ?= $(shell go env GOOS)
-GOARCH      ?= $(shell go env GOARCH)
-GOPATH      ?= $(shell go env GOPATH)
-GOBIN       ?= $(GOPATH)/bin
-GOCACHE     ?= $(GOPATH)/cache
-GOENV       ?= $(GOPATH)/env
 GOPROXY     ?= https://goproxy.cn,https://proxy.golang.com.cn,direct
-GOPRIVATE   ?= ''
-GO          := GOOS=$(GOOS) GOARCH=$(GOARCH) GOPATH=$(GOPATH) GOBIN=$(GOBIN) GOCACHE=$(GOCACHE) GOENV=$(GOENV) \
-				GOPROXY=$(GOPROXY) GOPRIVATE=$(GOPRIVATE) go
+GOPRIVATE   ?= $(shell go env GOPRIVATE)
+GO          := GOPROXY=$(GOPROXY) GOPRIVATE=$(GOPRIVATE) go
 
 REINSTALL   ?= false
 TOOLS       := \
