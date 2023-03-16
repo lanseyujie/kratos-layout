@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -31,10 +30,40 @@ func NewPostRepo(data *EntData, logger log.Logger) biz.PostRepo {
 
 // ------------
 
-func (repo *postRepo) CreatePost(ctx context.Context, bp *biz.Post) (id string, err error) {
-	var ep *ent.Post
-	ep, err = repo.data.PostClient(ctx).Create().
-		SetTitle(bp.Title).SetContent(bp.Content).
+func (repo *postRepo) bizToData(bo *biz.Post, do *ent.Post) *ent.Post {
+	if do == nil {
+		do = &ent.Post{}
+	}
+
+	do.ID = bo.ID
+	do.Title = bo.Title
+	do.Content = bo.Content
+	do.CreatedAt = bo.CreatedAt
+	do.UpdatedAt = bo.UpdatedAt
+
+	return do
+}
+
+func (repo *postRepo) dataToBiz(do *ent.Post, bo *biz.Post) *biz.Post {
+	if bo == nil {
+		bo = &biz.Post{}
+	}
+
+	bo.ID = do.ID
+	bo.Title = do.Title
+	bo.Content = do.Content
+	bo.CreatedAt = do.CreatedAt
+	bo.UpdatedAt = do.UpdatedAt
+
+	return bo
+}
+
+// ------------
+
+func (repo *postRepo) CreatePost(ctx context.Context, bizPost *biz.Post) (id string, err error) {
+	var entPost *ent.Post
+	entPost, err = repo.data.PostClient(ctx).Create().
+		SetTitle(bizPost.Title).SetContent(bizPost.Content).
 		Save(ctx)
 	if err != nil {
 		if ent.IsConstraintError(err) {
@@ -48,16 +77,16 @@ func (repo *postRepo) CreatePost(ctx context.Context, bp *biz.Post) (id string, 
 		return
 	}
 
-	id = ep.ID
+	id = entPost.ID
 
 	return
 }
 
-func (repo *postRepo) GetPost(ctx context.Context, id string) (bp *biz.Post, err error) {
-	var ep *ent.Post
-	ep, err = repo.data.PostClient(ctx).Query().
+func (repo *postRepo) GetPost(ctx context.Context, id string) (bizPost *biz.Post, err error) {
+	var entPost *ent.Post
+	entPost, err = repo.data.PostClient(ctx).Query().
 		Where(post.ID(id), post.DeletedAtEQ(0)).
-		Only(ctx)
+		First(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			err = errors.Conflict(postv1.ErrorReason_ERROR_REASON_NOT_FOUND.String(), "post not found").
@@ -70,32 +99,33 @@ func (repo *postRepo) GetPost(ctx context.Context, id string) (bp *biz.Post, err
 		return
 	}
 
-	bp = &biz.Post{
-		ID:        ep.ID,
-		Title:     ep.Title,
-		Content:   ep.Content,
-		CreatedAt: ep.CreatedAt,
-		UpdatedAt: ep.UpdatedAt,
-	}
+	bizPost = repo.dataToBiz(entPost, nil)
 
 	return
 }
 
-func (repo *postRepo) ListPosts(ctx context.Context, keyword string) (bps []*biz.Post, err error) {
-	// 空格分隔关键词
-	keywords := strings.Split(strings.ReplaceAll(strings.TrimSpace(keyword), "  ", " "), " ")
-	wheres := make([]predicate.Post, 0, len(keywords))
-	for _, word := range keywords {
-		if len(word) == 0 {
-			continue
-		}
+func (repo *postRepo) list(ctx context.Context, ids, keywords []string) *ent.PostQuery {
+	q := repo.data.PostClient(ctx).Query()
+	if len(ids) > 0 {
+		q.Where(post.IDIn(ids...))
+	}
+	q.Where(post.DeletedAt(0))
 
-		wheres = append(wheres, post.TitleContains(word))
+	conds := make([]predicate.Post, 0, len(keywords))
+	for _, keyword := range keywords {
+		conds = append(conds, post.TitleContainsFold(keyword))
+	}
+	if len(conds) > 0 {
+		q.Where(post.Or(conds...))
 	}
 
-	var eps []*ent.Post
-	eps, err = repo.data.PostClient(ctx).Query().
-		Where(post.Or(wheres...), post.DeletedAtEQ(0)).
+	return q
+}
+
+func (repo *postRepo) ListPosts(ctx context.Context, ids, keywords []string) (bizPosts []*biz.Post, err error) {
+	var entPosts []*ent.Post
+	entPosts, err = repo.list(ctx, ids, keywords).
+		Order(ent.Desc(post.FieldUpdatedAt), ent.Asc(post.FieldTitle), ent.Desc(post.FieldCreatedAt)).
 		Order(ent.Desc(post.FieldUpdatedAt)).
 		// Offset(0).Limit(100).
 		All(ctx)
@@ -106,27 +136,39 @@ func (repo *postRepo) ListPosts(ctx context.Context, keyword string) (bps []*biz
 		return
 	}
 
-	bps = make([]*biz.Post, 0, len(eps))
-	for _, ep := range eps {
-		bps = append(bps, &biz.Post{
-			ID:        ep.ID,
-			Title:     ep.Title,
-			Content:   ep.Content,
-			CreatedAt: ep.CreatedAt,
-			UpdatedAt: ep.UpdatedAt,
-		})
+	bizPosts = make([]*biz.Post, len(entPosts))
+	for i, entPost := range entPosts {
+		bizPosts[i] = repo.dataToBiz(entPost, nil)
 	}
 
 	return
 }
 
-func (repo *postRepo) UpdatePost(ctx context.Context, id string, bp *biz.Post) (err error) {
+func (repo *postRepo) CountAccount(ctx context.Context, ids, keywords []string) (count int, err error) {
+	count, err = repo.list(ctx, ids, keywords).Count(ctx)
+
+	return
+}
+
+func (repo *postRepo) ExistAccount(ctx context.Context, title string) (bool, error) {
+	count, err := repo.data.PostClient(ctx).Query().
+		Where(post.Title(title)).
+		Where(post.DeletedAt(0)).
+		Count(ctx)
+
+	return count > 0, err
+}
+
+func (repo *postRepo) UpdatePost(ctx context.Context, id string, bizPost *biz.Post) (err error) {
 	if len(id) == 0 {
 		return
 	}
 
 	_, err = repo.data.PostClient(ctx).UpdateOneID(id).
-		SetTitle(bp.Title).SetContent(bp.Content).SetUpdatedAt(bp.UpdatedAt).
+		Where(post.DeletedAt(0)).
+		SetTitle(bizPost.Title).
+		SetContent(bizPost.Content).
+		SetUpdatedAt(bizPost.UpdatedAt).
 		Save(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -152,6 +194,7 @@ func (repo *postRepo) DeletePost(ctx context.Context, id string) (err error) {
 	}
 
 	_, err = repo.data.PostClient(ctx).UpdateOneID(id).
+		Where(post.DeletedAt(0)).
 		SetDeletedAt(int(time.Now().Unix())).
 		Save(ctx)
 	if err != nil {

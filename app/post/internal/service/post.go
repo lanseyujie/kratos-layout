@@ -2,6 +2,10 @@ package service
 
 import (
 	"context"
+	"time"
+
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 
 	postv1 "sns/api/sns/post/v1"
 	"sns/app/post/internal/biz"
@@ -20,12 +24,50 @@ func NewPostService(postUseCase *biz.PostUseCase) *PostService {
 	}
 }
 
+// ------------
+
+func (p *PostService) RegisterServiceServer(srv *grpc.Server) {
+	postv1.RegisterPostServiceServer(srv, p)
+}
+
+func (p *PostService) RegisterServiceHTTPServer(srv *http.Server) {
+	postv1.RegisterPostServiceHTTPServer(srv, p)
+}
+
+// ------------
+
+func (p *PostService) serviceToBiz(so *postv1.Post, bo *biz.Post) *biz.Post {
+	if bo == nil {
+		bo = &biz.Post{}
+	}
+
+	bo.ID = so.Id
+	bo.Title = so.Title
+	bo.Content = so.Content
+	bo.CreatedAt = time.Unix(so.CreatedAt, 0)
+	bo.UpdatedAt = time.Unix(so.UpdatedAt, 0)
+
+	return bo
+}
+
+func (p *PostService) bizToService(bo *biz.Post, so *postv1.Post) *postv1.Post {
+	if so == nil {
+		so = &postv1.Post{}
+	}
+
+	so.Id = bo.ID
+	so.Title = bo.Title
+	so.Content = bo.Content
+	so.CreatedAt = bo.CreatedAt.Unix()
+	so.UpdatedAt = bo.UpdatedAt.Unix()
+
+	return so
+}
+
+// ------------
+
 func (p *PostService) CreatePost(ctx context.Context, req *postv1.CreatePostRequest) (*postv1.CreatePostResponse, error) {
-	id, err := p.postUseCase.Create(ctx, &biz.Post{
-		ID:      req.Post.Id,
-		Title:   req.Post.Title,
-		Content: req.Post.Content,
-	})
+	id, err := p.postUseCase.Create(ctx, p.serviceToBiz(req.Post, nil))
 	if err != nil {
 		return nil, err
 	}
@@ -36,50 +78,35 @@ func (p *PostService) CreatePost(ctx context.Context, req *postv1.CreatePostRequ
 }
 
 func (p *PostService) GetPost(ctx context.Context, req *postv1.GetPostRequest) (*postv1.GetPostResponse, error) {
-	post, err := p.postUseCase.Get(ctx, req.Id)
+	bizPost, err := p.postUseCase.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &postv1.GetPostResponse{
-		Post: &postv1.Post{
-			Id:        post.ID,
-			Title:     post.Title,
-			Content:   post.Content,
-			CreatedAt: post.CreatedAt.Unix(),
-			UpdatedAt: post.UpdatedAt.Unix(),
-		},
-	}
+	resp := &postv1.GetPostResponse{Post: p.bizToService(bizPost, nil)}
 
 	return resp, nil
 }
 
 func (p *PostService) ListPosts(ctx context.Context, req *postv1.ListPostsRequest) (*postv1.ListPostsResponse, error) {
-	posts, err := p.postUseCase.List(ctx, req.Keyword)
+	bizPosts, err := p.postUseCase.List(ctx, req.Ids, req.Keyword)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &postv1.ListPostsResponse{Posts: make([]*postv1.Post, 0, len(posts))}
-	for _, post := range posts {
-		resp.Posts = append(resp.Posts, &postv1.Post{
-			Id:        post.ID,
-			Title:     post.Title,
-			Content:   post.Content,
-			CreatedAt: post.CreatedAt.Unix(),
-			UpdatedAt: post.UpdatedAt.Unix(),
-		})
+	resp := &postv1.ListPostsResponse{
+		Posts: make([]*postv1.Post, len(bizPosts)),
+	}
+
+	for i, bizPost := range bizPosts {
+		resp.Posts[i] = p.bizToService(bizPost, nil)
 	}
 
 	return resp, nil
 }
 
 func (p *PostService) UpdatePost(ctx context.Context, req *postv1.UpdatePostRequest) (*postv1.UpdatePostResponse, error) {
-	err := p.postUseCase.Update(ctx, req.Post.Id, &biz.Post{
-		ID:      req.Post.Id,
-		Title:   req.Post.Title,
-		Content: req.Post.Content,
-	})
+	err := p.postUseCase.Update(ctx, req.Post.Id, p.serviceToBiz(req.Post, nil))
 	if err != nil {
 		return nil, err
 	}
