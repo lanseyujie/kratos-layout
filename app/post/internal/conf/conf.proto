@@ -1,14 +1,35 @@
 syntax = "proto3";
 
-package conf;
+package kratos.app.sns.conf;
 
 option go_package = "app/post/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
 message Bootstrap {
-  Server server = 1; // Server
-  Data data = 2;     // Data Source
+  App app = 1;              // App Info.
+  Trace trace = 2;          // Jaeger Trace.
+  Server server = 3;        // Server Config.
+  Data data = 4;            // Data Source.
+  Registry registry = 5;    // Discovery Config.
+}
+
+message App {
+  string name = 1;
+  string version = 2;
+  string id = 3;
+  map<string, string> metadata = 4;
+}
+
+message Trace {
+  // report endpoint url.
+  optional string http_endpoint = 1;
+  // sample ratio.
+  optional double sample_ratio = 2;
+  // authentication with the collector endpoint.
+  optional string username = 3;
+  // authentication with the collector endpoint.
+  optional string password = 4;
 }
 
 message Server {
@@ -31,14 +52,43 @@ message Server {
 message Data {
   message Ent {
     message Migration {
-      bool drop_index = 1; // 迁移时删除旧索引
-      bool drop_column = 2; // 迁移时删除旧字段
-      bool foreign_keys = 3; // 迁移时允许创建外键
+      bool drop_index = 1;
+      bool drop_column = 2;
+      bool foreign_keys = 3;
     }
-    string driver = 1;
-    string dsn = 2;
-    Migration migration = 3;
+
+    bool debug = 1;
+    string driver = 2;
+    string dsn = 3;
+    int32 pool_size = 4;
+    int32 idle_size = 5;
+    google.protobuf.Duration idle_time = 6;
+    google.protobuf.Duration life_time = 7;
+    Migration migration = 8;
+  }
+
+  message Redis {
+    bool debug = 1;
+    string addr = 2;
+    string username = 3;
+    string password = 4;
+    uint64 pool_size = 5;
+    int32 db = 6;
+    google.protobuf.Duration dial_timeout = 7;
+    google.protobuf.Duration read_timeout = 8;
+    google.protobuf.Duration write_timeout = 9;
   }
 
   Ent ent = 1;
+  Redis redis = 2;
+}
+
+message Registry {
+  message Consul {
+    string address = 1;
+    optional string scheme = 2;
+    optional string token = 3;
+  }
+
+  Consul consul = 1;
 }
