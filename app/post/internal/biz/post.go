@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -22,10 +23,12 @@ type Post struct {
 // Repository Interface
 
 type PostRepo interface {
-	CreatePost(ctx context.Context, post *Post) (id string, err error)
-	GetPost(ctx context.Context, id string) (post *Post, err error)
-	ListPosts(ctx context.Context, keyword string) (list []*Post, err error)
-	UpdatePost(ctx context.Context, id string, post *Post) error
+	CreatePost(ctx context.Context, bizPost *Post) (id string, err error)
+	GetPost(ctx context.Context, id string) (bizPost *Post, err error)
+	ListPosts(ctx context.Context, ids, keywords []string) (bizPosts []*Post, err error)
+	CountAccount(ctx context.Context, ids, keywords []string) (count int, err error)
+	ExistAccount(ctx context.Context, title string) (bool, error)
+	UpdatePost(ctx context.Context, id string, bizPost *Post) error
 	DeletePost(ctx context.Context, id string) error
 }
 
@@ -43,35 +46,37 @@ func NewPostUseCase(postRepo PostRepo) *PostUseCase {
 	}
 }
 
-func (uc *PostUseCase) Create(ctx context.Context, post *Post) (string, error) {
-	if post.Title == "" {
+func (uc *PostUseCase) Create(ctx context.Context, bizPost *Post) (string, error) {
+	if bizPost.Title == "" {
 		return "", errors.New(500, v1.ErrorReason_ERROR_REASON_INVALID_PARAMS.String(), "invalid title")
 	}
 
-	post.UpdatedAt = time.Now()
+	bizPost.UpdatedAt = time.Now()
 
-	return uc.postRepo.CreatePost(ctx, post)
+	return uc.postRepo.CreatePost(ctx, bizPost)
 }
 
 func (uc *PostUseCase) Get(ctx context.Context, id string) (*Post, error) {
 	return uc.postRepo.GetPost(ctx, id)
 }
 
-func (uc *PostUseCase) List(ctx context.Context, keyword string) ([]*Post, error) {
-	return uc.postRepo.ListPosts(ctx, keyword)
+func (uc *PostUseCase) List(ctx context.Context, ids []string, keyword string) ([]*Post, error) {
+	keywords := strings.Fields(keyword)
+
+	return uc.postRepo.ListPosts(ctx, ids, keywords)
 }
 
-func (uc *PostUseCase) Update(ctx context.Context, id string, post *Post) error {
-	if post.ID == "" {
+func (uc *PostUseCase) Update(ctx context.Context, id string, bizPost *Post) error {
+	if bizPost.ID == "" {
 		return errors.New(500, v1.ErrorReason_ERROR_REASON_INVALID_PARAMS.String(), "invalid id")
 	}
-	if post.Title == "" {
+	if bizPost.Title == "" {
 		return errors.New(500, v1.ErrorReason_ERROR_REASON_INVALID_PARAMS.String(), "invalid title")
 	}
 
-	post.UpdatedAt = time.Now()
+	bizPost.UpdatedAt = time.Now()
 
-	return uc.postRepo.UpdatePost(ctx, id, post)
+	return uc.postRepo.UpdatePost(ctx, id, bizPost)
 }
 
 func (uc *PostUseCase) Delete(ctx context.Context, id string) error {

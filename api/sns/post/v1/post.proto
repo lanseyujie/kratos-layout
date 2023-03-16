@@ -73,13 +73,11 @@ message GetPostResponse {
 }
 
 message ListPostsRequest {
-  string keyword = 1;
-  int32 page_size = 2;
-  string page_token = 3;
+  repeated string ids = 1;
+  string keyword = 2;
 }
 message ListPostsResponse {
   repeated Post posts = 1;
-  string next_page_token = 2;
 }
 
 message UpdatePostRequest {

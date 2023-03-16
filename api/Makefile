@@ -44,6 +44,11 @@ api:
 	buf build
 	buf generate
 
+.PHONY: update
+# update module
+update:
+	buf mod update
+
 .PHONY: clean
 # clean generate code
 clean:
