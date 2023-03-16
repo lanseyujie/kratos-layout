@@ -5,4 +5,11 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewEntData, NewEntTransaction, NewPostRepo)
+var ProviderSet = wire.NewSet(
+	NewEntData,
+	NewEntTransaction,
+	NewRedisData,
+	NewRedisTransaction,
+	NewRedisHook,
+	NewPostRepo,
+)
