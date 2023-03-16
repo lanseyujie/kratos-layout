@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
 	_ "github.com/mattn/go-sqlite3"
 	// _ "github.com/go-sql-driver/mysql"
@@ -25,13 +26,25 @@ func NewEntData(cfg *conf.Data, logger log.Logger) (*EntData, func(), error) {
 
 	// init client
 	{
-		var err error
-		data.db, err = ent.Open(cfg.Ent.Driver, cfg.Ent.Dsn, ent.Debug())
+		// Ent
+		drv, err := sql.Open(cfg.Ent.Driver, cfg.Ent.Dsn)
 		if err != nil {
 			l.Errorf("failed opening: %v", err)
 
 			return nil, nil, err
 		}
+
+		// DB Config
+		drv.DB().SetMaxOpenConns(int(cfg.Ent.PoolSize))
+		drv.DB().SetMaxIdleConns(int(cfg.Ent.IdleSize))
+		drv.DB().SetConnMaxIdleTime(cfg.Ent.IdleTime.AsDuration())
+		drv.DB().SetConnMaxLifetime(cfg.Ent.LifeTime.AsDuration())
+
+		opts := []ent.Option{ent.Driver(drv), ent.Log(func(a ...any) { l.Debug(a...) })}
+		if cfg.Ent.Debug {
+			opts = append(opts, ent.Debug())
+		}
+		data.db = ent.NewClient(opts...)
 	}
 
 	// automatic migration
@@ -65,7 +78,7 @@ func NewEntData(cfg *conf.Data, logger log.Logger) (*EntData, func(), error) {
 // ------------
 
 // NewEntTransaction .
-func NewEntTransaction(d *EntData) biz.Transaction {
+func NewEntTransaction(d *EntData) biz.EntTransaction {
 	return d
 }
 
@@ -85,6 +98,8 @@ func (d *EntData) ExecTx(ctx context.Context, fn func(ctx context.Context) error
 
 	return tx.Commit()
 }
+
+// ------------
 
 func (d *EntData) PostClient(ctx context.Context) *ent.PostClient {
 	if tx, ok := ctx.Value(entTxKey{}).(*ent.Tx); ok {
