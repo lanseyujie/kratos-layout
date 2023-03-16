@@ -1,28 +1,15 @@
 package server
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/logging"
-	"github.com/go-kratos/kratos/v2/middleware/metadata"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 
-	postv1 "sns/api/sns/post/v1"
 	"sns/app/post/internal/conf"
-	"sns/app/post/internal/service"
 )
 
 // NewGRPCServer returns a gRPC server.
-func NewGRPCServer(c *conf.Server, post *service.PostService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, middlewares Middlewares, fns []RegisterServiceServer) *grpc.Server {
 	opts := []grpc.ServerOption{
-		grpc.Middleware(
-			recovery.Recovery(),
-			// tracing.Server(),
-			logging.Server(logger),
-			metadata.Server(),
-			validate.Validator(),
-		),
+		grpc.Middleware(middlewares...),
 	}
 
 	if c.Grpc.Network != "" {
@@ -36,7 +23,11 @@ func NewGRPCServer(c *conf.Server, post *service.PostService, logger log.Logger)
 	}
 
 	srv := grpc.NewServer(opts...)
-	postv1.RegisterPostServiceServer(srv, post)
+	for _, fn := range fns {
+		if fn != nil {
+			fn.RegisterServiceServer(srv)
+		}
+	}
 
 	return srv
 }
