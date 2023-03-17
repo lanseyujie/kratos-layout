@@ -1,15 +1,37 @@
+trace:
+  #http_endpoint: http://127.0.0.1:14268/api/traces
+  sample_ratio: 1.0
 server:
   http:
     addr: 0.0.0.0:8000
-    timeout: 1s
+    timeout: 2s
   grpc:
     addr: 0.0.0.0:9000
-    timeout: 1s
+    timeout: 2s
 data:
+  redis:
+    debug: false
+    addr: 127.0.0.1:6379
+    username: default
+    #password: password
+    pool_size: 100
+    db: 0
+    dial_timeout: 5s
+    read_timeout: 10s
+    write_timeout: 10s
   ent:
+    debug: false
     driver: sqlite3
     dsn: file:ent?mode=memory&cache=shared&_fk=1
+    pool_size: 30
+    idle_size: 20
+    idle_time: 30s
+    life_time: 3600s
     migration:
       drop_index: true
       drop_column: true
       foreign_keys: false
+registry:
+  consul:
+    #address: consul-server-0.consul-server.consul.svc:8501
+
