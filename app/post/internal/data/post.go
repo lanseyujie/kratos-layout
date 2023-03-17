@@ -63,7 +63,8 @@ func (repo *postRepo) dataToBiz(do *ent.Post, bo *biz.Post) *biz.Post {
 func (repo *postRepo) CreatePost(ctx context.Context, bizPost *biz.Post) (id string, err error) {
 	var entPost *ent.Post
 	entPost, err = repo.data.PostClient(ctx).Create().
-		SetTitle(bizPost.Title).SetContent(bizPost.Content).
+		SetTitle(bizPost.Title).
+		SetContent(bizPost.Content).
 		Save(ctx)
 	if err != nil {
 		if ent.IsConstraintError(err) {
@@ -89,7 +90,7 @@ func (repo *postRepo) GetPost(ctx context.Context, id string) (bizPost *biz.Post
 		First(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			err = errors.Conflict(postv1.ErrorReason_ERROR_REASON_NOT_FOUND.String(), "post not found").
+			err = errors.NotFound(postv1.ErrorReason_ERROR_REASON_NOT_FOUND.String(), "post not found").
 				WithCause(err)
 		} else {
 			err = errors.InternalServer(postv1.ErrorReason_ERROR_REASON_INTERNAL_ERROR.String(), "invalid query").
@@ -168,11 +169,10 @@ func (repo *postRepo) UpdatePost(ctx context.Context, id string, bizPost *biz.Po
 		Where(post.DeletedAt(0)).
 		SetTitle(bizPost.Title).
 		SetContent(bizPost.Content).
-		SetUpdatedAt(bizPost.UpdatedAt).
 		Save(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			err = errors.Conflict(postv1.ErrorReason_ERROR_REASON_NOT_FOUND.String(), "post not found").
+			err = errors.NotFound(postv1.ErrorReason_ERROR_REASON_NOT_FOUND.String(), "post not found").
 				WithCause(err)
 		} else if ent.IsConstraintError(err) {
 			err = errors.Conflict(postv1.ErrorReason_ERROR_REASON_ALREADY_EXISTS.String(), "post already exists").
