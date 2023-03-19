@@ -9,7 +9,6 @@ import (
 // ProviderSet is service providers.
 var ProviderSet = wire.NewSet(
 	NewPostService,
-	// wire.Bind(new(server.RegisterServiceServer), new(*NewPostService)),
 	NewServices,
 )
 

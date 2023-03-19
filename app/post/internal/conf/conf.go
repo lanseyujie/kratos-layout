@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"errors"
 	"os"
 	"runtime/debug"
 
@@ -14,14 +13,12 @@ import (
 var ProviderSet = wire.NewSet(
 	NewSourceFile,
 	NewSources,
-	NewConf,
+	NewConfLoad,
+	NewConfScan,
 	wire.FieldsOf(new(*Bootstrap), "App", "Trace", "Server", "Data", "Registry"),
 )
 
-var (
-	Name    = "sns-post"
-	Version = "1.0.0"
-)
+const Name = "sns-post-service"
 
 func NewSources(sf SourceFile) []config.Source {
 	return []config.Source{
@@ -29,12 +26,13 @@ func NewSources(sf SourceFile) []config.Source {
 	}
 }
 
-func NewConf(src []config.Source) (*Bootstrap, func(), error) {
+func NewConfLoad(src []config.Source) (config.Config, func(), error) {
 	cfg := config.New(config.WithSource(src...))
+	l := log.NewHelper(log.With(log.DefaultLogger, "module", "conf"))
 	cleanup := func() {
-		log.Warn("closing config resources")
+		l.Warn("closing config resources")
 		if err := cfg.Close(); err != nil {
-			log.Error(err)
+			l.Error(err)
 		}
 	}
 
@@ -42,35 +40,55 @@ func NewConf(src []config.Source) (*Bootstrap, func(), error) {
 		return nil, cleanup, err
 	}
 
-	var bc Bootstrap
-	if err := cfg.Scan(&bc); err != nil {
-		return nil, cleanup, err
+	return cfg, cleanup, nil
+}
+
+func NewConfScan(cfg config.Config) (*Bootstrap, error) {
+	bc := &Bootstrap{}
+	if err := cfg.Scan(bc); err != nil {
+		return nil, err
 	}
 
+	validator := func(bc *Bootstrap) error {
+		if v, ok := any(bc).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return err
+			}
+		}
+
+		bc.App.Name = Name
+		bc.App.Id, _ = os.Hostname()
+		if bc.App.Metadata == nil {
+			bc.App.Metadata = map[string]string{}
+		}
+
+		if buildInfo, ok := debug.ReadBuildInfo(); ok {
+			for _, kv := range buildInfo.Settings {
+				switch kv.Key {
+				case "vcs.revision":
+					bc.App.Metadata["revision"] = kv.Value
+				case "vcs.time":
+					bc.App.Metadata["committed_at"] = kv.Value
+				case "vcs.modified":
+					bc.App.Metadata["dirty_build"] = kv.Value
+				}
+			}
+		}
+
+		return nil
+	}
+
+	if err := validator(bc); err != nil {
+		return nil, err
+	}
+
+	// TODO:// 配置变更回调
 	err := cfg.Watch("trace", func(key string, value config.Value) {
-		log.Debugf("config changed: %s = %v\n", key, value)
+		log.Warnf("config changed: %s = %v\n", key, value)
 	})
 	if err != nil {
-		return nil, cleanup, err
+		return nil, err
 	}
 
-	id, _ := os.Hostname()
-	bc.App = &App{
-		Name:     Name,
-		Version:  Version,
-		Id:       id,
-		Metadata: map[string]string{},
-	}
-
-	if buildInfo, ok := debug.ReadBuildInfo(); ok {
-		for _, kv := range buildInfo.Settings {
-			bc.App.Metadata[kv.Key] = kv.Value
-		}
-	}
-
-	if bc.App.Name == "" || bc.App.Version == "" || bc.App.Version == "unknown" {
-		return nil, cleanup, errors.New("invalid app name or version")
-	}
-
-	return &bc, cleanup, nil
+	return bc, nil
 }

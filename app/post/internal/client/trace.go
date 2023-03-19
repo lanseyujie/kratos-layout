@@ -1,7 +1,6 @@
 package client
 
 import (
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
@@ -12,28 +11,24 @@ import (
 )
 
 func NewTracerProvider(appInfo *conf.App, traceSetting *conf.Trace) (trace.TracerProvider, error) {
-	opts := make([]tracesdk.TracerProviderOption, 0, 4)
-
-	fraction := 1.0
-	if traceSetting.SampleRatio != nil {
-		fraction = *traceSetting.SampleRatio
+	opts := []tracesdk.TracerProviderOption{
+		// set the sampling rate based on the parent span to 100%.
+		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(traceSetting.SampleRatio))),
+		// record information about this application in a resource.
+		tracesdk.WithResource(resource.NewSchemaless(
+			semconv.ServiceNameKey.String(appInfo.Name),
+			semconv.ServiceVersionKey.String(appInfo.Version),
+			semconv.ServiceInstanceIDKey.String(appInfo.Id)),
+		),
 	}
 
-	// set the sampling rate based on the parent span to 100%.
-	opts = append(opts, tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(fraction))))
-
-	attrs := []attribute.KeyValue{
-		semconv.ServiceNameKey.String(appInfo.Name),
-		semconv.ServiceVersionKey.String(appInfo.Version),
-		semconv.ServiceInstanceIDKey.String(appInfo.Id),
-	}
-
-	// record information about this application in a resource.
-	opts = append(opts, tracesdk.WithResource(resource.NewSchemaless(attrs...)))
-
-	if traceSetting.HttpEndpoint != nil && *traceSetting.HttpEndpoint != "" {
+	if traceSetting.HttpEndpoint != "" {
 		// create the jaeger exporter.
-		exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(*traceSetting.HttpEndpoint)))
+		exp, err := jaeger.New(jaeger.WithCollectorEndpoint(
+			jaeger.WithEndpoint(traceSetting.HttpEndpoint),
+			jaeger.WithUsername(traceSetting.Username),
+			jaeger.WithPassword(traceSetting.Password),
+		))
 		if err != nil {
 			return nil, err
 		}
