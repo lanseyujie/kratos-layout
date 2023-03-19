@@ -121,8 +121,8 @@ github.com/go-kratos/aegis v0.1.4 h1:rVLXJNohV1d2GUFi7TwPReF23clhaAtAzrz03IP6GMo
 github.com/go-kratos/aegis v0.1.4/go.mod h1:Lk2PFCRyeYiXMJhCYgvJLXdc5AZEDk1Pik66SAIv0gY=
 github.com/go-kratos/grpc-gateway/v2 v2.5.1-0.20210811062259-c92d36e434b1 h1:jPqlxMJEoi8Yv4WIAhQNKczdKjADox8WKrTp3bJNjFM=
 github.com/go-kratos/grpc-gateway/v2 v2.5.1-0.20210811062259-c92d36e434b1/go.mod h1:qV5/s5A7wfY7GkNzptcUFRGAG4Y8H4mlXpSrOkDEIk0=
-github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230316050305-d05729399e23 h1:cGKM7A3puPIeqPueMOmoFKSF18nKjctXajmswDefIL0=
-github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230316050305-d05729399e23/go.mod h1:frF7e15yNrG7u/TZ1xBppfUD2eKA4SJN4lhKdyJPj34=
+github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230317163802-78a2089f2bb3 h1:fFUrsrTNPQXJXhgg6IL3waIPM/j0pqDcJoj+wcNkMnM=
+github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230317163802-78a2089f2bb3/go.mod h1:frF7e15yNrG7u/TZ1xBppfUD2eKA4SJN4lhKdyJPj34=
 github.com/go-kratos/kratos/v2 v2.0.3/go.mod h1:Hgl0YPry9YyLtwTTfwLfowPKg+YS0dgZ06O5NHqz5hE=
 github.com/go-kratos/kratos/v2 v2.6.1 h1:4GSy7I7YGF93c1W83XkWAXNqY7JzNdC3t4l501rl0Xg=
 github.com/go-kratos/kratos/v2 v2.6.1/go.mod h1:OT/2NR0jpfxMgdTdIew8of9cGBab0UKaZRadcgTgqS0=
@@ -416,8 +416,8 @@ go.opentelemetry.io/otel/trace v1.7.0/go.mod h1:fzLSB9nqR2eXzxPXb2JW9IKE+ScyXA48
 go.opentelemetry.io/otel/trace v1.14.0 h1:wp2Mmvj41tDsyAJXiWDWpfNsOiIyd38fy85pyKcFq/M=
 go.opentelemetry.io/otel/trace v1.14.0/go.mod h1:8avnQLK+CG77yNLUae4ea2JDQ6iT+gozhnZjy/rw9G8=
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=
-go.uber.org/automaxprocs v1.5.1 h1:e1YG66Lrk73dn4qhg8WFSvhF0JuFQF0ERIp4rpuV8Qk=
-go.uber.org/automaxprocs v1.5.1/go.mod h1:BF4eumQw0P9GtnuxxovUd06vwm1o18oMzFtK66vU6XU=
+go.uber.org/automaxprocs v1.5.2 h1:2LxUOGiR3O6tw8ui5sZa2LAaHnsviZdVOUZw4fvbnME=
+go.uber.org/automaxprocs v1.5.2/go.mod h1:eRbA25aqJrxAbsLO0xy5jVwPt7FQnRgjW+efnwa1WM0=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=

@@ -5,7 +5,7 @@ go 1.20
 require (
 	entgo.io/ent v0.11.10
 	github.com/envoyproxy/protoc-gen-validate v0.9.1
-	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230316050305-d05729399e23
+	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230317163802-78a2089f2bb3
 	github.com/go-kratos/kratos/v2 v2.6.1
 	github.com/go-kratos/swagger-api v1.0.1
 	github.com/google/uuid v1.3.0
@@ -18,7 +18,7 @@ require (
 	go.opentelemetry.io/otel/exporters/jaeger v1.14.0
 	go.opentelemetry.io/otel/sdk v1.14.0
 	go.opentelemetry.io/otel/trace v1.14.0
-	go.uber.org/automaxprocs v1.5.1
+	go.uber.org/automaxprocs v1.5.2
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.30.0

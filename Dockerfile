@@ -39,9 +39,6 @@ RUN set -eux \
     && ([ ! -z "$APP" ] || exit 1) \
     && mkdir -p /srv/configs
 
-COPY --from=builder /srv/$PROJECT/configs/$APP.yaml /srv/configs/$APP.yaml
-COPY --from=builder /srv/$PROJECT/bin/$APP /srv/app
-
 WORKDIR /srv
 
 EXPOSE 8000

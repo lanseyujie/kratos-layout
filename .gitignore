@@ -30,7 +30,7 @@ Thumbs.db
 *.cert
 *.key
 *.log
-*.pb.go
+*.pb*.go
 wire_gen.go
 bin/
 

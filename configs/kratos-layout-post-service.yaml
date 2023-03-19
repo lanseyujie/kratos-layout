@@ -1,26 +1,22 @@
+app:
+  name: sns-post-service
+  version: 1.0.0-alpha
+  metadata:
+    key1: value1
 trace:
   #http_endpoint: http://127.0.0.1:14268/api/traces
   sample_ratio: 1.0
+  #username: username
+  #password: password
 server:
-  http:
-    addr: 0.0.0.0:8000
-    timeout: 2s
   grpc:
     addr: 0.0.0.0:9000
     timeout: 2s
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 2s
 data:
-  redis:
-    debug: false
-    addr: 127.0.0.1:6379
-    username: default
-    #password: password
-    pool_size: 100
-    db: 0
-    dial_timeout: 5s
-    read_timeout: 10s
-    write_timeout: 10s
   ent:
-    debug: false
     driver: sqlite3
     dsn: file:ent?mode=memory&cache=shared&_fk=1
     pool_size: 30
@@ -31,7 +27,20 @@ data:
       drop_index: true
       drop_column: true
       foreign_keys: false
+    debug: false
+  redis:
+    addr: 127.0.0.1:6379
+    #username: default
+    #password: password
+    pool_size: 100
+    db: 0
+    dial_timeout: 5s
+    read_timeout: 10s
+    write_timeout: 10s
+    debug: false
 registry:
   consul:
-    #address: consul-server-0.consul-server.consul.svc:8501
+    address: consul-server-0.consul-server.consul.svc:8501
+    #scheme: https
+    #token: b57f63e5-a119-2f8b-b47f-578225229c4b
 

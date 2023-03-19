@@ -19,7 +19,6 @@ GOBUILD     := CGO_ENABLED=$(CGO_ENABLED) $(GO) build
 GOTEST      := CGO_ENABLED=on $(GO) test -race -count=1 -cover -v
 GCFLAGS     += -d=ssa/check_bce
 LDFLAGS     += -s -w -extldflags "-static"
-LDFLAGS     += -X "conf.Version=$(VERSION)"
 
 BUILD_FLAGS := -v -trimpath -tags $(MODE) -gcflags='$(GCFLAGS)' -ldflags '$(LDFLAGS)'
 
@@ -71,7 +70,7 @@ api:
 .PHONY: config
 # generate internal proto
 config:
-	buf generate --exclude-path ./api
+	buf generate
 
 .PHONY: generate
 # generate code
