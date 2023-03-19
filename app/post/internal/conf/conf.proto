@@ -2,51 +2,56 @@ syntax = "proto3";
 
 package kratos.app.sns.conf;
 
+import "google/protobuf/duration.proto";
+import "validate/validate.proto";
+
 option go_package = "app/post/internal/conf;conf";
 
-import "google/protobuf/duration.proto";
 
 message Bootstrap {
-  App app = 1;              // App Info.
-  Trace trace = 2;          // Jaeger Trace.
-  Server server = 3;        // Server Config.
-  Data data = 4;            // Data Source.
-  Registry registry = 5;    // Discovery Config.
+  App app = 1 [(validate.rules).message.required = true];
+  Trace trace = 2 [(validate.rules).message.required = true];
+  Server server = 3 [(validate.rules).message.required = true];
+  Data data = 4 [(validate.rules).message.required = true];
+  Registry registry = 5 [(validate.rules).message.required = true];
 }
 
 message App {
-  string name = 1;
-  string version = 2;
+  string name = 1 [(validate.rules).string.ignore_empty = false];
+  // Semantic Versioning 2.0.0
+  // https://semver.org/lang/zh-CN/
+  // https://regex101.com/r/Ly7O1x/3/
+  string version = 2 [(validate.rules).string.pattern = "^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"];
   string id = 3;
   map<string, string> metadata = 4;
 }
 
 message Trace {
   // report endpoint url.
-  optional string http_endpoint = 1;
+  string http_endpoint = 1;
   // sample ratio.
-  optional double sample_ratio = 2;
+  double sample_ratio = 2;
   // authentication with the collector endpoint.
-  optional string username = 3;
+  string username = 3;
   // authentication with the collector endpoint.
-  optional string password = 4;
+  string password = 4;
 }
 
 message Server {
-  message HTTP {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration timeout = 3;
-  }
-
   message GRPC {
     string network = 1;
     string addr = 2;
     google.protobuf.Duration timeout = 3;
   }
 
-  HTTP http = 1;
-  GRPC grpc = 2;
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+
+  GRPC grpc = 1 [(validate.rules).message.required = true];
+  HTTP http = 2 [(validate.rules).message.required = true];
 }
 
 message Data {
@@ -57,38 +62,38 @@ message Data {
       bool foreign_keys = 3;
     }
 
-    bool debug = 1;
-    string driver = 2;
-    string dsn = 3;
-    int32 pool_size = 4;
-    int32 idle_size = 5;
-    google.protobuf.Duration idle_time = 6;
-    google.protobuf.Duration life_time = 7;
-    Migration migration = 8;
+    string driver = 1 [(validate.rules).string.ignore_empty = false];
+    string dsn = 2 [(validate.rules).string.ignore_empty = false];
+    int32 pool_size = 3;
+    int32 idle_size = 4;
+    google.protobuf.Duration idle_time = 5;
+    google.protobuf.Duration life_time = 6;
+    Migration migration = 7;
+    bool debug = 8;
   }
 
   message Redis {
-    bool debug = 1;
-    string addr = 2;
-    string username = 3;
-    string password = 4;
-    uint64 pool_size = 5;
-    int32 db = 6;
-    google.protobuf.Duration dial_timeout = 7;
-    google.protobuf.Duration read_timeout = 8;
-    google.protobuf.Duration write_timeout = 9;
+    string addr = 1 [(validate.rules).string.ignore_empty = false];
+    string username = 2;
+    string password = 3;
+    uint64 pool_size = 4;
+    int32 db = 5;
+    google.protobuf.Duration dial_timeout = 6;
+    google.protobuf.Duration read_timeout = 7;
+    google.protobuf.Duration write_timeout = 8;
+    bool debug = 9;
   }
 
-  Ent ent = 1;
-  Redis redis = 2;
+  Ent ent = 1 [(validate.rules).message.required = true];
+  Redis redis = 2 [(validate.rules).message.required = true];
 }
 
 message Registry {
   message Consul {
-    string address = 1;
-    optional string scheme = 2;
-    optional string token = 3;
+    string address = 1 [(validate.rules).string.ignore_empty = false];
+    string scheme = 2;
+    string token = 3;
   }
 
-  Consul consul = 1;
+  Consul consul = 1 [(validate.rules).message.required = true];
 }

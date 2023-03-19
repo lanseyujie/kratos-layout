@@ -1,5 +1,10 @@
 version: v1
 plugins:
+- name: validate
+  out: .
+  opt:
+  - paths=source_relative
+  - lang=go
 - name: go
   out: .
   opt:
