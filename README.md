@@ -1,10 +1,14 @@
 # Kratos Layout
 
+## Feature
+
 - [x] Buf
 
 - [x] Ent
 
 - [x] Redis
+
+- [x] JWT Auth
 
 - [x] Consul Discovery
 
@@ -15,3 +19,13 @@
 - [x] Dockerfile
 
 - [x] Makefile
+
+
+## Usage
+
+```shell
+make init
+make clean
+make all
+make build
+```
