@@ -10,6 +10,8 @@
 
 - [x] Jaeger Trace
 
+- [x] Private Go Module
+
 - [x] Dockerfile
 
 - [x] Makefile

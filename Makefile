@@ -14,6 +14,7 @@ GOOS        ?= $(shell go env GOOS)
 GOARCH      ?= $(shell go env GOARCH)
 GOPROXY     ?= https://goproxy.cn,https://proxy.golang.com.cn,direct
 GOPRIVATE   ?= $(shell go env GOPRIVATE)
+PRIVATEKEY  ?= ''
 GO          := GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY) GOPRIVATE=$(GOPRIVATE) go
 GOBUILD     := CGO_ENABLED=$(CGO_ENABLED) $(GO) build
 GOTEST      := CGO_ENABLED=on $(GO) test -race -count=1 -cover -v
@@ -142,6 +143,7 @@ image/%:
 		--build-arg TIMEZONE=Asia/Shanghai \
 		--build-arg GOPROXY=$(GOPROXY) \
 		--build-arg GOPRIVATE=$(GOPRIVATE) \
+		--build-arg PRIVATEKEY=$(PRIVATEKEY) \
 		--build-arg PROJECT=$(PROJECT) \
 		--build-arg APP=$* \
 		-t $(REGISTRY)/$(CODENAME)/$*:$(VERSION) .
