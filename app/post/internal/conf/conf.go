@@ -12,6 +12,7 @@ import (
 // ProviderSet is conf providers.
 var ProviderSet = wire.NewSet(
 	NewSourceFile,
+	NewSourceKubernetes,
 	NewSources,
 	NewConfLoad,
 	NewConfScan,
@@ -20,9 +21,10 @@ var ProviderSet = wire.NewSet(
 
 const Name = "sns-post-service"
 
-func NewSources(sf SourceFile) []config.Source {
+func NewSources(sf SourceFile, sk SourceKubernetes) []config.Source {
 	return []config.Source{
 		sf,
+		sk,
 	}
 }
 
