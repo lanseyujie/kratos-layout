@@ -16,7 +16,7 @@ var ProviderSet = wire.NewSet(
 	NewSources,
 	NewConfLoad,
 	NewConfScan,
-	wire.FieldsOf(new(*Bootstrap), "App", "Trace", "Server", "Data", "Registry"),
+	wire.FieldsOf(new(*Bootstrap), "App", "Trace", "Server", "Data", "Registry", "Auth"),
 )
 
 const Name = "sns-post-service"
@@ -85,7 +85,7 @@ func NewConfScan(cfg config.Config) (*Bootstrap, error) {
 	}
 
 	// TODO:// 配置变更回调
-	err := cfg.Watch("trace", func(key string, value config.Value) {
+	err := cfg.Watch("auth", func(key string, value config.Value) {
 		log.Warnf("config changed: %s = %v\n", key, value)
 	})
 	if err != nil {

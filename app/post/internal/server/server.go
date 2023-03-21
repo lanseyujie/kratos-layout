@@ -7,7 +7,12 @@ import (
 )
 
 // ProviderSet is server providers.
-var ProviderSet = wire.NewSet(NewServerMiddlewares, NewGRPCServer, NewHTTPServer)
+var ProviderSet = wire.NewSet(
+	NewWhiteList,
+	NewServerMiddlewares,
+	NewGRPCServer,
+	NewHTTPServer,
+)
 
 type RegisterServiceServer interface {
 	RegisterServiceServer(srv *grpc.Server)

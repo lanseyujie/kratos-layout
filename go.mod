@@ -5,10 +5,11 @@ go 1.20
 require (
 	entgo.io/ent v0.11.10
 	github.com/envoyproxy/protoc-gen-validate v0.10.1
-	github.com/go-kratos/kratos/contrib/config/kubernetes/v2 v2.0.0-20230320114145-0c2d2632ac9d
-	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230320114145-0c2d2632ac9d
+	github.com/go-kratos/kratos/contrib/config/kubernetes/v2 v2.0.0-20230321073308-9a973d29c24b
+	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20230321073308-9a973d29c24b
 	github.com/go-kratos/kratos/v2 v2.6.1
 	github.com/go-kratos/swagger-api v1.0.1
+	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
 	github.com/google/wire v0.5.0
 	github.com/gorilla/handlers v1.5.1

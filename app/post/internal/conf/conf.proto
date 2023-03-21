@@ -14,6 +14,7 @@ message Bootstrap {
   Server server = 3 [(validate.rules).message.required = true];
   Data data = 4 [(validate.rules).message.required = true];
   Registry registry = 5 [(validate.rules).message.required = true];
+  Auth auth = 6 [(validate.rules).message.required = true];
 }
 
 message App {
@@ -97,3 +98,9 @@ message Registry {
 
   Consul consul = 1 [(validate.rules).message.required = true];
 }
+
+message Auth {
+  string key = 1;
+  map<string, string> claims = 2;
+}
+
