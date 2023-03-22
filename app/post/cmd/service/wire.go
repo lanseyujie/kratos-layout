@@ -11,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/google/wire"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
@@ -23,7 +24,7 @@ import (
 	"sns/app/post/internal/service"
 )
 
-func newApp(cfg *conf.App, logger log.Logger, rr registry.Registrar, tp trace.TracerProvider, gs *grpc.Server) *kratos.App {
+func newApp(cfg *conf.App, logger log.Logger, rr registry.Registrar, tp trace.TracerProvider, gs *grpc.Server, hs *http.Server) *kratos.App {
 	return kratos.New(
 		kratos.Name(cfg.Name),
 		kratos.Version(cfg.Version),
@@ -36,7 +37,7 @@ func newApp(cfg *conf.App, logger log.Logger, rr registry.Registrar, tp trace.Tr
 		}),
 		kratos.Logger(logger),
 		kratos.Registrar(rr),
-		kratos.Server(gs),
+		kratos.Server(gs, hs),
 	)
 }
 

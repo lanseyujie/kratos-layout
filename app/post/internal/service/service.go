@@ -9,11 +9,18 @@ import (
 // ProviderSet is service providers.
 var ProviderSet = wire.NewSet(
 	NewPostService,
-	NewServices,
+	NewGRPCServices,
+	NewHTTPServices,
 )
 
-func NewServices(post *PostService) []server.RegisterServiceServer {
+func NewGRPCServices(post *PostService) []server.RegisterServiceServer {
 	return []server.RegisterServiceServer{
+		post,
+	}
+}
+
+func NewHTTPServices(post *PostService) []server.RegisterServiceHTTPServer {
+	return []server.RegisterServiceHTTPServer{
 		post,
 	}
 }
