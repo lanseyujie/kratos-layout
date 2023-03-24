@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	postv1 "sns/api/sns/post/v1"
@@ -68,10 +67,10 @@ func (repo *postRepo) CreatePost(ctx context.Context, bizPost *biz.Post) (id str
 		Save(ctx)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			err = errors.Conflict(postv1.ErrorReason_ERROR_REASON_ALREADY_EXISTS.String(), "post already exists").
+			err = postv1.ErrorErrorReasonAlreadyExists("post already exists").
 				WithCause(err)
 		} else {
-			err = errors.InternalServer(postv1.ErrorReason_ERROR_REASON_INTERNAL_ERROR.String(), "invalid query").
+			err = postv1.ErrorErrorReasonInternalError("query error").
 				WithCause(err)
 		}
 
@@ -90,10 +89,10 @@ func (repo *postRepo) GetPost(ctx context.Context, id string) (bizPost *biz.Post
 		First(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			err = errors.NotFound(postv1.ErrorReason_ERROR_REASON_NOT_FOUND.String(), "post not found").
+			err = postv1.ErrorErrorReasonNotFound("post not found").
 				WithCause(err)
 		} else {
-			err = errors.InternalServer(postv1.ErrorReason_ERROR_REASON_INTERNAL_ERROR.String(), "invalid query").
+			err = postv1.ErrorErrorReasonInternalError("query error").
 				WithCause(err)
 		}
 
@@ -131,7 +130,7 @@ func (repo *postRepo) ListPosts(ctx context.Context, ids, keywords []string) (bi
 		// Offset(0).Limit(100).
 		All(ctx)
 	if err != nil {
-		err = errors.InternalServer(postv1.ErrorReason_ERROR_REASON_INTERNAL_ERROR.String(), "invalid query").
+		err = postv1.ErrorErrorReasonInternalError("query error").
 			WithCause(err)
 
 		return
@@ -172,13 +171,13 @@ func (repo *postRepo) UpdatePost(ctx context.Context, id string, bizPost *biz.Po
 		Save(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			err = errors.NotFound(postv1.ErrorReason_ERROR_REASON_NOT_FOUND.String(), "post not found").
+			err = postv1.ErrorErrorReasonNotFound("post not found").
 				WithCause(err)
 		} else if ent.IsConstraintError(err) {
-			err = errors.Conflict(postv1.ErrorReason_ERROR_REASON_ALREADY_EXISTS.String(), "post already exists").
+			err = postv1.ErrorErrorReasonAlreadyExists("post already exists").
 				WithCause(err)
 		} else {
-			err = errors.InternalServer(postv1.ErrorReason_ERROR_REASON_INTERNAL_ERROR.String(), "invalid query").
+			err = postv1.ErrorErrorReasonInternalError("query error").
 				WithCause(err)
 		}
 
@@ -198,7 +197,7 @@ func (repo *postRepo) DeletePost(ctx context.Context, id string) (err error) {
 		SetDeletedAt(int(time.Now().Unix())).
 		Save(ctx)
 	if err != nil {
-		err = errors.InternalServer(postv1.ErrorReason_ERROR_REASON_INTERNAL_ERROR.String(), "invalid query").
+		err = postv1.ErrorErrorReasonInternalError("query error").
 			WithCause(err)
 
 		return

@@ -5,9 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
-
-	v1 "sns/api/sns/post/v1"
+	postv1 "sns/api/sns/post/v1"
 )
 
 // DDD: DO, Domain Object
@@ -48,7 +46,7 @@ func NewPostUseCase(postRepo PostRepo) *PostUseCase {
 
 func (uc *PostUseCase) Create(ctx context.Context, bizPost *Post) (string, error) {
 	if bizPost.Title == "" {
-		return "", errors.New(500, v1.ErrorReason_ERROR_REASON_INVALID_PARAMS.String(), "invalid title")
+		return "", postv1.ErrorErrorReasonInvalidParams("invalid title")
 	}
 
 	bizPost.UpdatedAt = time.Now()
@@ -68,10 +66,10 @@ func (uc *PostUseCase) List(ctx context.Context, ids []string, keyword string) (
 
 func (uc *PostUseCase) Update(ctx context.Context, id string, bizPost *Post) error {
 	if bizPost.ID == "" {
-		return errors.New(500, v1.ErrorReason_ERROR_REASON_INVALID_PARAMS.String(), "invalid id")
+		return postv1.ErrorErrorReasonInvalidParams("invalid id")
 	}
 	if bizPost.Title == "" {
-		return errors.New(500, v1.ErrorReason_ERROR_REASON_INVALID_PARAMS.String(), "invalid title")
+		return postv1.ErrorErrorReasonInvalidParams("invalid title")
 	}
 
 	bizPost.UpdatedAt = time.Now()
