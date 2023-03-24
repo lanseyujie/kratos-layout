@@ -17,6 +17,10 @@ plugins:
   out: .
   opt:
   - paths=source_relative
+- name: go-errors
+  out: .
+  opt:
+  - paths=source_relative
 - name: openapi
   out: .
   opt:

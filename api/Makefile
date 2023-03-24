@@ -8,6 +8,7 @@ TOOLS       := \
 	protoc-gen-go:google.golang.org/protobuf/cmd/protoc-gen-go@latest \
 	protoc-gen-go-grpc:google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest \
 	protoc-gen-go-http:github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest \
+	protoc-gen-go-errors:github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2@latest \
 	protoc-gen-validate:github.com/envoyproxy/protoc-gen-validate@latest \
 	protoc-gen-openapi:github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 
@@ -26,17 +27,22 @@ init:
 .PHONY: fmt
 # format code
 fmt:
-	@echo buf format
+	buf format -d -w
 
 .PHONY: lint
 # check lint
 lint:
 	buf lint
 
-.PHONY: break
+.PHONY: break-release
 # check breaking changes
-break:
+breaking-release:
 	buf breaking --against '.git#branch=main'
+
+.PHONY: break-upstream
+# check breaking changes
+breaking-upstream:
+	buf breaking --against 'ssh://git@github.com/your_project/api.git#branch=dev'
 
 .PHONY: api
 # generate api code
