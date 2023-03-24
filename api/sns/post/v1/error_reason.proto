@@ -17,7 +17,8 @@ enum ErrorReason {
 
   ERROR_REASON_INTERNAL_ERROR = 1;
   ERROR_REASON_INVALID_PARAMS = 2 [(errors.code) = 400];
-  ERROR_REASON_NOT_FOUND = 3 [(errors.code) = 404];
-  ERROR_REASON_ALREADY_EXISTS = 4 [(errors.code) = 409];
-  ERROR_REASON_TOO_MANY_REQUESTS = 5[(errors.code) = 429];
+  ERROR_REASON_INVALID_CREDENTIALS = 3 [(errors.code) = 401];
+  ERROR_REASON_NOT_FOUND = 4 [(errors.code) = 404];
+  ERROR_REASON_ALREADY_EXISTS = 5 [(errors.code) = 409];
+  ERROR_REASON_TOO_MANY_REQUESTS = 6 [(errors.code) = 429];
 }

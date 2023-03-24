@@ -49,7 +49,10 @@ service PostService {
 
 message Post {
   string id = 1;
-  string title = 2 [(validate.rules).string = { min_len: 1, max_len: 128 }];
+  string title = 2 [(validate.rules).string = {
+    min_len: 1,
+    max_len: 128
+  }];
   string content = 3;
 
   reserved 5 to 15;
@@ -61,6 +64,7 @@ message Post {
 message CreatePostRequest {
   Post post = 1 [(validate.rules).message.required = true];
 }
+
 message CreatePostResponse {
   string id = 1;
 }
@@ -68,6 +72,7 @@ message CreatePostResponse {
 message GetPostRequest {
   string id = 1 [(validate.rules).string.ignore_empty = false];
 }
+
 message GetPostResponse {
   Post post = 1;
 }
@@ -76,6 +81,7 @@ message ListPostsRequest {
   repeated string ids = 1;
   string keyword = 2;
 }
+
 message ListPostsResponse {
   repeated Post posts = 1;
 }
@@ -83,9 +89,11 @@ message ListPostsResponse {
 message UpdatePostRequest {
   Post post = 1;
 }
-message UpdatePostResponse { }
+
+message UpdatePostResponse {}
 
 message DeletePostRequest {
-  string id = 1;
+  string id = 1 [(validate.rules).string.ignore_empty = false];
 }
-message DeletePostResponse { }
+
+message DeletePostResponse {}
